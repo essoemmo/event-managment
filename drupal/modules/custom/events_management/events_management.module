@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Main module file for Events Management.
+ */
+
+use Drupal\Core\Config\ConfigCrudEvent;
+use Drupal\Core\Config\ConfigEvents;
+//use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+/**
+ * Implements hook_help() to provide module documentation.
+ */
+function events_management_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+    if ($route_name == 'help.page.events_management') {
+        return '<p>' . t(
+                'The Events Management module allows you to manage events with CRUD functionality, configuration options, and event listings.'
+            ) . '</p>';
+    }
+}
+
+/**
+ * Log configuration changes.
+ */
+function events_management_config_insert(ConfigCrudEvent $event): void
+{
+    $config_name = $event->getConfig()->getName();
+    if ($config_name === 'events_management.settings') {
+        \Drupal::database()->insert('events_management_log')
+            ->fields([
+                'configuration' => serialize($event->getConfig()->get()),
+                'timestamp' => \Drupal::time()->getRequestTime(),
+            ])
+            ->execute();
+    }
+}
+
+
+function events_management_theme($existing, $type, $theme, $path): array
+{
+    return [
+        'event_list' => [
+            'variables' => ['events' => []],
+            'template' => 'event-list',
+            'path' => drupal_get_path('module', 'events_management') . '/templates',
+        ],
+    ];
+}

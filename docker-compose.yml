@@ -1,0 +1,58 @@
+
+services:
+  drupal:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - ./drupal:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - drupal
+    environment:
+      - DRUPAL_DATABASE_HOST=db
+      - DRUPAL_DATABASE_NAME=drupal
+      - DRUPAL_DATABASE_USER=root
+      - DRUPAL_DATABASE_PASSWORD=secret
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0.39
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: drupal
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - drupal
+    command: --default-authentication-plugin=mysql_native_password
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: db
+      MYSQL_USERNAME: root
+      MYSQL_ROOT_PASSWORD: secret
+    networks:
+      - drupal
+    depends_on:
+      - db
+
+networks:
+  drupal:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local

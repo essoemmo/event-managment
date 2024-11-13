@@ -1,0 +1,23 @@
+events_management.settings:
+  path: '/admin/config/events_management/settings'
+  defaults:
+    _form: '\Drupal\events_management\Form\EventsSettingsForm'
+    _title: 'Events Management Settings'
+  requirements:
+    _permission: 'administer events management'
+
+events_management.list:
+  path: '/events'
+  defaults:
+    _controller: '\Drupal\events_management\Controller\EventListController::listEvents'
+    _title: 'Events'
+  requirements:
+    _permission: 'access content'
+
+events_management.detail:
+  path: '/event/{id}'
+  defaults:
+    _controller: '\Drupal\events_management\Controller\EventListController::eventDetails'
+    _title: 'Event Detail'
+  requirements:
+    _permission: 'access content'

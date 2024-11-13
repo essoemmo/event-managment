@@ -1,0 +1,42 @@
+<?php
+
+namespace Drupal\events_management\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Database\Database;
+
+class EventListController extends ControllerBase
+{
+
+    public function listEvents(): array
+    {
+        $query = Database::getConnection()->select('events', 'e')
+            ->fields('e', ['title', 'start_time', 'end_time', 'category']);
+        $results = $query->execute()->fetchAll();
+
+        return [
+            '#theme' => 'item_list',
+            '#items' => array_map(function ($event) {
+                return $event->title . ' (' . $event->category . ')';
+            }, $results),
+        ];
+    }
+
+    public function eventDetails($event_id): array
+    {
+        $event = Database::getConnection()->select('events', 'e')
+            ->fields('e')
+            ->condition('id', $event_id)
+            ->execute()
+            ->fetch();
+
+        return [
+            '#theme' => 'item_list',
+            '#items' => [
+                'Title: ' . $event->title,
+                'Description: ' . $event->description,
+                'Category: ' . $event->category,
+            ],
+        ];
+    }
+}
